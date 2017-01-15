@@ -5,45 +5,98 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.EditText;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener{
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    private TextView xCoord, yCoord, zCoord;
+    private TextView tv_light, tv_lightreading, tv_light_high, tv_lightreading_high;
+    private TextView tv_accel, tv_accelreading, tv_accel_high, tv_accelreading_high;
+    private TextView tv_mag, tv_magreading, tv_mag_high, tv_magreading_high;
+
+    double maxLight = 0, maxAccel_x = 0, maxAccel_y = 0, maxAccel_z = 0, maxMag_x = 0, maxMag_y = 0, maxMag_z = 0;
 
     private SensorManager mSensorManager;
+    private Sensor mLightSensor;
     private Sensor mAccelerometer;
     //private float[] mGravity = new float[3];
+    private Sensor mMagSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        xCoord = (TextView) findViewById(R.id.x_coord);
-        yCoord = (TextView) findViewById(R.id.y_coord);
-        zCoord = (TextView) findViewById(R.id.z_coord);
-
-        /*LinearLayout relativeLayout = (LinearLayout) findViewById(R.id.activity_main);
-
-        xCoord = new TextView(getApplicationContext());
-        xCoord.setText("Hello!");
-        relativeLayout.addView(xCoord);*/
-
+        //sensor stuff
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        mMagSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+
+        //reference linear layout
+        LinearLayout layout = (LinearLayout)findViewById(R.id.lin_layout);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        /////////////////////////create required textviews and add to linear layout//////////////////////////////
+        //light sensor textviews
+        tv_light = new TextView(getApplicationContext());
+        layout.addView(tv_light);
+        tv_light.setText("The light sensor reading is:");
+        tv_lightreading = new TextView(getApplicationContext()); //textview for the reading values
+        layout.addView(tv_lightreading);
+        tv_lightreading.setText("0.00");
+
+        //record high light sensor textviews
+        tv_light_high = new TextView(getApplicationContext());
+        layout.addView(tv_light_high);
+        tv_light_high.setText("The record-high light sensor reading is:");
+        tv_lightreading_high = new TextView(getApplicationContext()); //textview for the reading values
+        layout.addView(tv_lightreading_high);
+        tv_lightreading_high.setText("0.00");
+
+        //accelerometer textviews
+        tv_accel = new TextView(getApplicationContext());
+        layout.addView(tv_accel);
+        tv_accel.setText("The accelerometer reading is:");
+        tv_accelreading = new TextView(getApplicationContext()); //textview for the reading values
+        layout.addView(tv_accelreading);
+        tv_accelreading.setText("(0, 0, 0)");
+
+        //record high accelerometer textviews
+        tv_accel_high = new TextView(getApplicationContext());
+        layout.addView(tv_accel_high);
+        tv_accel_high.setText("The record-high accelerometer reading is:");
+        tv_accelreading_high = new TextView(getApplicationContext()); //textview for the reading values
+        layout.addView(tv_accelreading_high);
+        tv_accelreading_high.setText("(0, 0, 0)");
+
+        //magnetic sensor textviews
+        tv_mag = new TextView(getApplicationContext());
+        layout.addView(tv_mag);
+        tv_mag.setText("The magnetic sensor reading is:");
+        tv_magreading = new TextView(getApplicationContext()); //textview for the reading values
+        layout.addView(tv_magreading);
+        tv_magreading.setText("(0, 0, 0)");
+
+        //record high magnetic sensor textviews
+        tv_mag_high = new TextView(getApplicationContext());
+        layout.addView(tv_mag_high);
+        tv_mag_high.setText("The record-high magnetic sensor reading reading is:");
+        tv_magreading_high = new TextView(getApplicationContext()); //textview for the reading values
+        layout.addView(tv_magreading_high);
+        tv_magreading_high.setText("(0, 0, 0)");
+
     }
 
     @Override
     protected void onResume(){
         super.onResume();
+        mSensorManager.registerListener(this, mLightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mMagSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -59,12 +112,48 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent event){
+
+        //changes in light sensor
+        if(event.sensor.getType() == Sensor.TYPE_LIGHT){
+            tv_lightreading.setText(String.format("%.2f",event.values[0]));
+            //check if max light achieved
+            double currLight = event.values[0];
+            if(currLight > maxLight){
+                maxLight = currLight;
+                tv_lightreading_high.setText(String.format("%.2f",maxLight));
+            }
+        }
+
+        //changes in accelerometer
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-            xCoord.setText(Float.toString(event.values[0]));
-            yCoord.setText(Float.toString(event.values[1]));
-            zCoord.setText(Float.toString(event.values[2]));
+            tv_accelreading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");
+            //check if max acceleration components achieved
+            if(event.values[0] > maxAccel_x){
+                maxAccel_x = event.values[0];
+            }
+            if(event.values[1] > maxAccel_y){
+                maxAccel_y = event.values[1];
+            }
+            if(event.values[2] > maxAccel_z){
+                maxAccel_z = event.values[2];
+            }
+            tv_accelreading_high.setText("(" + String.format("%.2f",maxAccel_x) + ", " + String.format("%.2f",maxAccel_y) + ", " + String.format("%.2f",maxAccel_z) + ")");
+        }
+
+        //changes in magnetic sensor
+        if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+            tv_magreading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");
+            //check if max acceleration components achieved
+            if(event.values[0] > maxMag_x){
+                maxMag_x = event.values[0];
+            }
+            if(event.values[1] > maxMag_y){
+                maxMag_y = event.values[1];
+            }
+            if(event.values[2] > maxMag_z){
+                maxMag_z = event.values[2];
+            }
+            tv_magreading_high.setText("(" + String.format("%.2f",maxMag_x) + ", " + String.format("%.2f",maxMag_y) + ", " + String.format("%.2f",maxMag_z) + ")");
         }
     }
-
-
 }
