@@ -23,8 +23,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView tv_light, tv_lightreading, tv_light_high, tv_lightreading_high;
     private TextView tv_accel, tv_accelreading, tv_accel_high, tv_accelreading_high;
     private TextView tv_mag, tv_magreading, tv_mag_high, tv_magreading_high;
+    private TextView rot_vec, tv_rot_reading, tv_rot_high, tv_rot_reading_high;
 
-    double maxLight = 0, maxAccel_x = 0, maxAccel_y = 0, maxAccel_z = 0, maxMag_x = 0, maxMag_y = 0, maxMag_z = 0;
+    double maxLight = 0, maxAccel_x = 0, maxAccel_y = 0, maxAccel_z = 0, maxMag_x = 0, maxMag_y = 0, maxMag_z = 0, maxVec_x = 0, maxVec_y = 0, maxVec_z = 0;
 
     double[][] accelArray = new double[100][3];     //csv file array
 
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor mAccelerometer;
     //private float[] mGravity = new float[3];
     private Sensor mMagSensor;
+    private Sensor mRotSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         mMagSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        mRotSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
 
 
 
@@ -105,6 +109,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         layout.addView(tv_magreading_high);
         tv_magreading_high.setText("(0, 0, 0)");
 
+
+        //Rotation vector
+        rot_vec = new TextView(getApplicationContext());
+        layout.addView(rot_vec);
+        rot_vec.setText("The rotation vector reading is: ");
+        tv_rot_reading = new TextView(getApplicationContext());
+        layout.addView(tv_rot_reading);
+        tv_rot_reading.setText("(0, 0, 0)");
+
+        //rotation vector highest readings
+        tv_rot_high = new TextView(getApplicationContext());
+        layout.addView(tv_rot_high);
+        tv_rot_high.setText("The record-high rotation vector sensor reading is:");
+        tv_rot_reading_high = new TextView(getApplicationContext());
+        layout.addView(tv_rot_reading_high);
+        tv_rot_reading_high.setText("(0, 0, 0)");
+
         //BUTTONS
         Button resetButton = new Button(getApplicationContext());
         resetButton.setText("Reset Readings");
@@ -113,9 +134,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                tv_accelreading_high.setText("(0, 0, 0)");
-                tv_lightreading_high.setText("0.00");
-                tv_magreading_high.setText("(0, 0, 0)");
+                resetMax();
             }
         });
 
@@ -142,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.registerListener(this, mLightSensor, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);       //should make SENSOR_DELAY_GAME?
         mSensorManager.registerListener(this, mMagSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mRotSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -213,6 +233,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
             tv_magreading_high.setText("(" + String.format("%.2f",maxMag_x) + ", " + String.format("%.2f",maxMag_y) + ", " + String.format("%.2f",maxMag_z) + ")");
         }
+        //Changes in Rotation Vector
+
+        if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR){
+            tv_rot_reading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");;
+
+            //check for max reading
+            if(event.values[0] > maxVec_x){
+                maxVec_x = event.values[0];
+            }
+            if(event.values[1] > maxVec_y){
+                maxVec_y = event.values[1];
+            }
+            if(event.values[2] > maxVec_z){
+                maxVec_z = event.values[2];
+            }
+            tv_rot_reading_high.setText("(" + String.format("%.2f",maxVec_x) + ", " + String.format("%.2f",maxVec_y) + ", " + String.format("%.2f",maxVec_z) + ")");;
+        }
     }
 
     public void fileWrite(){
@@ -224,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             writer1 = new PrintWriter(accelRead);
 
             for( int i = 0; i< 99; i++) {
-                writer1.println("(" + accelArray[i][0] + ", " + accelArray[i][1] + ", " + accelArray[i][2] + ")");
+                writer1.println(accelArray[i][0] + ", " + accelArray[i][1] + ", " + accelArray[i][2]);
 
             }
         }
@@ -237,6 +274,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                writer1.close();
            }
         }
+    }
+
+    public  void resetMax(){
+        maxAccel_x = 0; maxAccel_y = 0; maxAccel_z = 0;
+        tv_accelreading_high.setText("(0, 0, 0)");
+        maxLight = 0;
+        tv_lightreading_high.setText("0.00");
+        maxMag_x = 0; maxMag_y = 0; maxMag_z = 0;
+        tv_magreading_high.setText("(0, 0, 0)");
+        maxVec_x = 0; maxVec_y = 0; maxVec_z = 0;
+        tv_rot_reading_high.setText("(0, 0, 0)");
     }
 
 }
