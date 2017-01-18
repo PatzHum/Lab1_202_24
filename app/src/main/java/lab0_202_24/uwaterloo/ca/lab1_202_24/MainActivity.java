@@ -7,8 +7,16 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -17,6 +25,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView tv_mag, tv_magreading, tv_mag_high, tv_magreading_high;
 
     double maxLight = 0, maxAccel_x = 0, maxAccel_y = 0, maxAccel_z = 0, maxMag_x = 0, maxMag_y = 0, maxMag_z = 0;
+
+    double[][] accelArray = new double[100][3];     //csv file array
+
 
     private SensorManager mSensorManager;
     private Sensor mLightSensor;
@@ -36,9 +47,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mMagSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
 
+
+
+
         //reference linear layout
         LinearLayout layout = (LinearLayout)findViewById(R.id.lin_layout);
         layout.setOrientation(LinearLayout.VERTICAL);
+
+
 
         /////////////////////////create required textviews and add to linear layout//////////////////////////////
         //light sensor textviews
@@ -89,13 +105,42 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         layout.addView(tv_magreading_high);
         tv_magreading_high.setText("(0, 0, 0)");
 
+        //BUTTONS
+        Button resetButton = new Button(getApplicationContext());
+        resetButton.setText("Reset Readings");
+        layout.addView(resetButton);
+
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tv_accelreading_high.setText("(0, 0, 0)");
+                tv_lightreading_high.setText("0.00");
+                tv_magreading_high.setText("(0, 0, 0)");
+            }
+        });
+
+
+        Button csvDeposit = new Button(getApplicationContext());
+        csvDeposit.setText("Deposit Acceleration Readings");
+        layout.addView(csvDeposit);
+        csvDeposit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                fileWrite();
+            }
+        });
+
+
+
     }
+
+
 
     @Override
     protected void onResume(){
         super.onResume();
         mSensorManager.registerListener(this, mLightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);       //should make SENSOR_DELAY_GAME?
         mSensorManager.registerListener(this, mMagSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
@@ -138,6 +183,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 maxAccel_z = event.values[2];
             }
             tv_accelreading_high.setText("(" + String.format("%.2f",maxAccel_x) + ", " + String.format("%.2f",maxAccel_y) + ", " + String.format("%.2f",maxAccel_z) + ")");
+
+           //update csv array
+
+                for(int p = 0;  p < 99; p++){           //increment all elements one space over, erasing last element
+                    for (int k = 0; k< 3; k++)
+                        accelArray[p+1][k] = accelArray[p][k];
+                }
+
+            for(int i = 0; i<3; i++){                   //store current reading in first spot
+                accelArray[0][i] = event.values[i];
+
+           }
+
         }
 
         //changes in magnetic sensor
@@ -156,4 +214,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             tv_magreading_high.setText("(" + String.format("%.2f",maxMag_x) + ", " + String.format("%.2f",maxMag_y) + ", " + String.format("%.2f",maxMag_z) + ")");
         }
     }
+
+    public void fileWrite(){
+        File accelRead = null;
+        PrintWriter writer1 = null;
+
+        try{
+            accelRead = new File(getExternalFilesDir("Lab 1"), "AccelReadings.csv");
+            writer1 = new PrintWriter(accelRead);
+
+            for( int i = 0; i< 99; i++) {
+                writer1.println("(" + accelArray[i][0] + ", " + accelArray[i][1] + ", " + accelArray[i][2] + ")");
+
+            }
+        }
+        catch(IOException ex1){
+            Log.d("Lab 1", "Failed to Write File: " + ex1.toString());
+        }
+        finally{
+           if(writer1 != null){
+               writer1.flush();
+               writer1.close();
+           }
+        }
+    }
+
 }
