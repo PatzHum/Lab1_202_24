@@ -33,12 +33,13 @@ public abstract class SensorHandler {
         mMaxOutputLabel.setText(String.format("The maximum %s reading is: ", sensorType));
     }
 
-    protected void UpdateMaxValues(float[] values){
+    private void UpdateMaxValues(float[] values){
         for (int i = 0; i < values.length; ++i){
             if (mMaximumValues.size() <= i) {
                 mMaximumValues.add(values[i]);
-            }else if ( Math.abs(values[i]) > Math.abs(mMaximumValues.get(i)))
+            }else if (Math.abs(values[i]) > Math.abs(mMaximumValues.get(i))) {
                 mMaximumValues.set(i, values[i]);
+            }
         }
     }
 
@@ -46,8 +47,8 @@ public abstract class SensorHandler {
         return values;
     }
 
-    public void HandleOutput(float[] values){
-        values = ProcessData(values);
+    public void HandleOutput(float[] v){
+        float[] values = ProcessData(v);
 
         UpdateMaxValues(values);
 
@@ -70,5 +71,11 @@ public abstract class SensorHandler {
         }
         outputMaxValueString += ")";
         mMaxOutputValue.setText(outputMaxValueString);
+    }
+
+    public void Reset(){
+        for (int i = 0; i < mMaximumValues.size(); ++i){
+            mMaximumValues.set(i, (float) 0);
+        }
     }
 }

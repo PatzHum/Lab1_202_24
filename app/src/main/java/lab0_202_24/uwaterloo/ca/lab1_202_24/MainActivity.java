@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor mRotSensor;
 
     private AccelerationHandler accelerationHandler;
+    private GeneralSensorHandler lightHandler, mFieldHandler, rotHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,12 +62,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         LinearLayout layout = (LinearLayout)findViewById(R.id.lin_layout);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        accelerationHandler = new AccelerationHandler(getApplicationContext(), layout, "acceleration");
 
         lineGraphView = new LineGraphView(getApplicationContext(), 100, Arrays.asList("x", "y", "z"));
         layout.addView(lineGraphView);
         lineGraphView.setVisibility(View.VISIBLE);
 
+        lightHandler = new GeneralSensorHandler(getApplicationContext(), layout, "light");
+        accelerationHandler = new AccelerationHandler(getApplicationContext(), layout, "acceleration");
+        mFieldHandler = new GeneralSensorHandler(getApplicationContext(), layout, "magnetic");
+        rotHandler = new GeneralSensorHandler(getApplicationContext(), layout, "rotation");
+
+        /*
         /////////////////////////create required textviews and add to linear layout//////////////////////////////
         //light sensor textviews
         tv_light = new TextView(getApplicationContext());
@@ -133,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         layout.addView(tv_rot_reading_high);
         tv_rot_reading_high.setText("(0, 0, 0)");
 
+        */
         //BUTTONS
         Button resetButton = new Button(getApplicationContext());
         resetButton.setText("Reset Readings");
@@ -187,20 +194,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //changes in light sensor
         if(event.sensor.getType() == Sensor.TYPE_LIGHT){
-            tv_lightreading.setText(String.format("%.2f",event.values[0]));
+            float[] values = new float[1];
+            values[0] = event.values[0];
+            lightHandler.HandleOutput(values);
+            /*tv_lightreading.setText(String.format("%.2f",event.values[0]));
             //check if max light achieved
             float currLight = event.values[0];
             if(currLight > maxLight){
                 maxLight = currLight;
                 tv_lightreading_high.setText(String.format("%.2f",maxLight));
-            }
+            }*/
         }
 
         //changes in accelerometer
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
             accelerationHandler.HandleOutput(event.values);
 
-            float alpha = (float) 0.8;
+            /*float alpha = (float) 0.8;
 
             gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
             gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
@@ -235,13 +245,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             for(int i = 0; i<3; i++){                   //store current reading in first spot
                 accelArray[0][i] = acc[i];
 
-           }
+           }*/
 
         }
 
         //changes in magnetic sensor
         if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
-            tv_magreading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");
+            mFieldHandler.HandleOutput(event.values);
+            /*tv_magreading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");
             //check if max acceleration components achieved
             if(Math.abs(event.values[0]) > Math.abs(maxMag_x)){
                 maxMag_x = event.values[0];
@@ -253,10 +264,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 maxMag_z = event.values[2];
             }
             tv_magreading_high.setText("(" + String.format("%.2f",maxMag_x) + ", " + String.format("%.2f",maxMag_y) + ", " + String.format("%.2f",maxMag_z) + ")");
+            */
         }
         //Changes in Rotation Vector
 
         if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR){
+            rotHandler.HandleOutput(event.values);
+            /*
             tv_rot_reading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");;
 
             //check for max reading
@@ -270,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 maxVec_z = event.values[2];
             }
             tv_rot_reading_high.setText("(" + String.format("%.2f",maxVec_x) + ", " + String.format("%.2f",maxVec_y) + ", " + String.format("%.2f",maxVec_z) + ")");;
+            */
         }
     }
 
@@ -297,7 +312,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public  void resetMax(){
-        maxAccel_x = 0; maxAccel_y = 0; maxAccel_z = 0;
+        accelerationHandler.Reset();
+        lightHandler.Reset();
+        rotHandler.Reset();
+        mFieldHandler.Reset();
+
+        /*maxAccel_x = 0; maxAccel_y = 0; maxAccel_z = 0;
         tv_accelreading_high.setText("(0, 0, 0)");
         maxLight = 0;
         tv_lightreading_high.setText("0.00");
@@ -305,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         tv_magreading_high.setText("(0, 0, 0)");
         maxVec_x = 0; maxVec_y = 0; maxVec_z = 0;
         tv_rot_reading_high.setText("(0, 0, 0)");
+        */
     }
 
 }

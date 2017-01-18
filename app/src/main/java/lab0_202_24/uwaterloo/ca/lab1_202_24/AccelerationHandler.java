@@ -20,8 +20,6 @@ public class AccelerationHandler extends SensorHandler {
 
     @Override
     protected float[] ProcessData(float[] values){
-        UpdateMaxValues(values);
-
         float alpha = (float) 0.8;
 
         gravity[0] = alpha * gravity[0] + (1 - alpha) * values[0];
