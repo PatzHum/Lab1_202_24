@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -24,6 +26,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView tv_accel, tv_accelreading, tv_accel_high, tv_accelreading_high;
     private TextView tv_mag, tv_magreading, tv_mag_high, tv_magreading_high;
 
+    private float[] gravity = new float[3];
+
+    private LineGraphView lineGraphView;
     double maxLight = 0, maxAccel_x = 0, maxAccel_y = 0, maxAccel_z = 0, maxMag_x = 0, maxMag_y = 0, maxMag_z = 0;
 
     double[][] accelArray = new double[100][3];     //csv file array
@@ -54,7 +59,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         LinearLayout layout = (LinearLayout)findViewById(R.id.lin_layout);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-
+        lineGraphView = new LineGraphView(getApplicationContext(), 100, Arrays.asList("x", "y", "z"));
+        layout.addView(lineGraphView);
+        lineGraphView.setVisibility(View.VISIBLE);
 
         /////////////////////////create required textviews and add to linear layout//////////////////////////////
         //light sensor textviews
@@ -162,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if(event.sensor.getType() == Sensor.TYPE_LIGHT){
             tv_lightreading.setText(String.format("%.2f",event.values[0]));
             //check if max light achieved
-            double currLight = event.values[0];
+            float currLight = event.values[0];
             if(currLight > maxLight){
                 maxLight = currLight;
                 tv_lightreading_high.setText(String.format("%.2f",maxLight));
@@ -171,16 +178,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //changes in accelerometer
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-            tv_accelreading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");
+
+            float alpha = (float) 0.8;
+
+            gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
+            gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
+            gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+            
+            float[] acc = new float[3];
+            acc[0] = event.values[0] - gravity[0];
+            acc[1] = event.values[1] - gravity[1];
+            acc[2] = event.values[2] - gravity[2];
+            
+            tv_accelreading.setText("(" + String.format("%.2f",acc[0]) + ", " + String.format("%.2f",acc[1]) + ", " + String.format("%.2f",acc[2]) + ")");
             //check if max acceleration components achieved
-            if(event.values[0] > maxAccel_x){
-                maxAccel_x = event.values[0];
+            if(Math.abs(acc[0]) > Math.abs(maxAccel_x)){
+                maxAccel_x = acc[0];
             }
-            if(event.values[1] > maxAccel_y){
-                maxAccel_y = event.values[1];
+            if(Math.abs(acc[1]) > Math.abs(maxAccel_y)){
+                maxAccel_y = acc[1];
             }
-            if(event.values[2] > maxAccel_z){
-                maxAccel_z = event.values[2];
+            if(Math.abs(acc[2]) > Math.abs(maxAccel_z)){
+                maxAccel_z = acc[2];
             }
             tv_accelreading_high.setText("(" + String.format("%.2f",maxAccel_x) + ", " + String.format("%.2f",maxAccel_y) + ", " + String.format("%.2f",maxAccel_z) + ")");
 
@@ -190,9 +209,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     for (int k = 0; k< 3; k++)
                         accelArray[p+1][k] = accelArray[p][k];
                 }
+            lineGraphView.addPoint(acc);
 
             for(int i = 0; i<3; i++){                   //store current reading in first spot
-                accelArray[0][i] = event.values[i];
+                accelArray[0][i] = acc[i];
 
            }
 
@@ -224,8 +244,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             writer1 = new PrintWriter(accelRead);
 
             for( int i = 0; i< 99; i++) {
-                writer1.println("(" + accelArray[i][0] + ", " + accelArray[i][1] + ", " + accelArray[i][2] + ")");
-
+                writer1.println(accelArray[i][0] + ", " + accelArray[i][1] + ", " + accelArray[i][2]);
             }
         }
         catch(IOException ex1){
