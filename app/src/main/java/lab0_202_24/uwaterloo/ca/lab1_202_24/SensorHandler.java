@@ -4,6 +4,7 @@ import android.content.Context;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Locale;
 import java.util.Vector;
 
 /**
@@ -15,6 +16,8 @@ public abstract class SensorHandler {
     Vector<Float> mMaximumValues;
 
     SensorHandler(Context applicationContext, LinearLayout layout, String sensorType){
+        mMaximumValues = new Vector<>();
+
         mOutputLabel = new TextView(applicationContext);
         mOutputValue = new TextView(applicationContext);
         mMaxOutputLabel = new TextView(applicationContext);
@@ -26,13 +29,15 @@ public abstract class SensorHandler {
         layout.addView(mMaxOutputValue);
 
 
-        mOutputLabel.setText(String.format("The %s sensor reading is: "));
-        mMaxOutputLabel.setText(String.format("The maximum %s reading is: "));
+        mOutputLabel.setText(String.format("The %s sensor reading is: ", sensorType));
+        mMaxOutputLabel.setText(String.format("The maximum %s reading is: ", sensorType));
     }
 
     protected void UpdateMaxValues(float[] values){
         for (int i = 0; i < values.length; ++i){
-            if (Math.abs(values[i]) > Math.abs(mMaximumValues.get(i)))
+            if (mMaximumValues.size() <= i) {
+                mMaximumValues.add(values[i]);
+            }else if ( Math.abs(values[i]) > Math.abs(mMaximumValues.get(i)))
                 mMaximumValues.set(i, values[i]);
         }
     }
@@ -46,21 +51,24 @@ public abstract class SensorHandler {
 
         UpdateMaxValues(values);
 
-        String outputValueString = "";
+        String outputValueString = "(";
         for (int i = 0; i < values.length; ++i){
             if (i != 0){
                 outputValueString += ",";
             }
-            outputValueString += Float.toString(values[i]);
+            outputValueString += String.format(Locale.CANADA, "%.2f", values[i]);
         }
+        outputValueString += ")";
         mOutputValue.setText(outputValueString);
 
-        String outputMaxValueString = "";
+        String outputMaxValueString = "(";
         for (int i = 0; i < mMaximumValues.size(); ++i){
             if (i != 0){
                 outputMaxValueString += ",";
             }
-            outputMaxValueString += Float.toString(mMaximumValues.get(i));
+            outputMaxValueString += String.format(Locale.CANADA, "%.2f", mMaximumValues.get(i));
         }
+        outputMaxValueString += ")";
+        mMaxOutputValue.setText(outputMaxValueString);
     }
 }

@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor mMagSensor;
     private Sensor mRotSensor;
 
+    private AccelerationHandler accelerationHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,13 +57,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mRotSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
 
-
-
-
-
         //reference linear layout
         LinearLayout layout = (LinearLayout)findViewById(R.id.lin_layout);
         layout.setOrientation(LinearLayout.VERTICAL);
+
+        accelerationHandler = new AccelerationHandler(getApplicationContext(), layout, "acceleration");
 
         lineGraphView = new LineGraphView(getApplicationContext(), 100, Arrays.asList("x", "y", "z"));
         layout.addView(lineGraphView);
@@ -198,6 +198,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //changes in accelerometer
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            accelerationHandler.HandleOutput(event.values);
 
             float alpha = (float) 0.8;
 
