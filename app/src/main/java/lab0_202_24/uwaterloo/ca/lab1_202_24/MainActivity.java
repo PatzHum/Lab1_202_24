@@ -27,14 +27,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView tv_mag, tv_magreading, tv_mag_high, tv_magreading_high;
     private TextView rot_vec, tv_rot_reading, tv_rot_high, tv_rot_reading_high;
 
-<<<<<<< HEAD
     double maxLight = 0, maxAccel_x = 0, maxAccel_y = 0, maxAccel_z = 0, maxMag_x = 0, maxMag_y = 0, maxMag_z = 0, maxVec_x = 0, maxVec_y = 0, maxVec_z = 0;
-=======
     private float[] gravity = new float[3];
 
     private LineGraphView lineGraphView;
-    double maxLight = 0, maxAccel_x = 0, maxAccel_y = 0, maxAccel_z = 0, maxMag_x = 0, maxMag_y = 0, maxMag_z = 0;
->>>>>>> origin/master
 
     double[][] accelArray = new double[100][3];     //csv file array
 
@@ -286,10 +282,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             for( int i = 0; i< 99; i++) {
                 writer1.println(accelArray[i][0] + ", " + accelArray[i][1] + ", " + accelArray[i][2]);
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
             }
         }
         catch(IOException ex1){
