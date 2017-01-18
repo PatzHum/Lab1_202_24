@@ -13,9 +13,11 @@ import java.util.Locale;
 public class AccelerationHandler extends SensorHandler {
 
     float[] gravity = new float[3];
+    LineGraphView mLineGraphView;
 
-    AccelerationHandler(Context applicationContext, LinearLayout layout, String sensorType){
+    AccelerationHandler(Context applicationContext, LinearLayout layout, String sensorType, LineGraphView lineGraphView){
         super(applicationContext, layout, sensorType);
+        mLineGraphView = lineGraphView;
     }
 
     @Override
@@ -34,5 +36,11 @@ public class AccelerationHandler extends SensorHandler {
         return acc;
     }
 
+    @Override
+    public void HandleOutput(float[] v, int maxLen) {
+        super.HandleOutput(v, maxLen);
+        v = ProcessData(v);
+        mLineGraphView.addPoint(v);
+    }
 
 }

@@ -48,12 +48,15 @@ public abstract class SensorHandler {
     }
 
     public void HandleOutput(float[] v){
+        HandleOutput(v, Integer.MAX_VALUE);
+    }
+    public void HandleOutput(float[] v, int maxLen){
         float[] values = ProcessData(v);
 
         UpdateMaxValues(values);
 
         String outputValueString = "(";
-        for (int i = 0; i < values.length; ++i){
+        for (int i = 0; i < Math.min(values.length, maxLen); ++i){
             if (i != 0){
                 outputValueString += ",";
             }
@@ -63,7 +66,7 @@ public abstract class SensorHandler {
         mOutputValue.setText(outputValueString);
 
         String outputMaxValueString = "(";
-        for (int i = 0; i < mMaximumValues.size(); ++i){
+        for (int i = 0; i < Math.min(mMaximumValues.size(), maxLen); ++i){
             if (i != 0){
                 outputMaxValueString += ",";
             }

@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         lineGraphView.setVisibility(View.VISIBLE);
 
         lightHandler = new GeneralSensorHandler(getApplicationContext(), layout, "light");
-        accelerationHandler = new AccelerationHandler(getApplicationContext(), layout, "acceleration");
+        accelerationHandler = new AccelerationHandler(getApplicationContext(), layout, "acceleration", lineGraphView);
         mFieldHandler = new GeneralSensorHandler(getApplicationContext(), layout, "magnetic");
         rotHandler = new GeneralSensorHandler(getApplicationContext(), layout, "rotation");
 
@@ -209,7 +209,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //changes in accelerometer
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
             accelerationHandler.HandleOutput(event.values);
-
+            for (int p = 0; p < 99; ++p){
+                for (int k = 0; k < 3; k++){
+                    accelArray[p+1][k] = accelArray[p][k];
+                }
+            }
+            for(int i = 0; i<3; i++) {                   //store current reading in first spot
+                accelArray[0][i] = event.values[i];
+            }
             /*float alpha = (float) 0.8;
 
             gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
@@ -269,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //Changes in Rotation Vector
 
         if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR){
-            rotHandler.HandleOutput(event.values);
+            rotHandler.HandleOutput(event.values, 4);
             /*
             tv_rot_reading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");;
 
