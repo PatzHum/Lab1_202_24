@@ -165,10 +165,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume(){
         super.onResume();
-        mSensorManager.registerListener(this, mLightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);       //should make SENSOR_DELAY_GAME?
-        mSensorManager.registerListener(this, mMagSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mRotSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mLightSensor, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);       //should make SENSOR_DELAY_GAME?
+        mSensorManager.registerListener(this, mMagSensor, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this, mRotSensor, SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -242,13 +242,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
             tv_magreading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");
             //check if max acceleration components achieved
-            if(event.values[0] > maxMag_x){
+            if(Math.abs(event.values[0]) > Math.abs(maxMag_x)){
                 maxMag_x = event.values[0];
             }
-            if(event.values[1] > maxMag_y){
+            if(Math.abs(event.values[1]) > Math.abs(maxMag_y)){
                 maxMag_y = event.values[1];
             }
-            if(event.values[2] > maxMag_z){
+            if(Math.abs(event.values[2]) > Math.abs(maxMag_z)){
                 maxMag_z = event.values[2];
             }
             tv_magreading_high.setText("(" + String.format("%.2f",maxMag_x) + ", " + String.format("%.2f",maxMag_y) + ", " + String.format("%.2f",maxMag_z) + ")");
@@ -259,13 +259,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             tv_rot_reading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");;
 
             //check for max reading
-            if(event.values[0] > maxVec_x){
+            if(Math.abs(event.values[0]) > Math.abs(maxVec_x)){
                 maxVec_x = event.values[0];
             }
-            if(event.values[1] > maxVec_y){
+            if(Math.abs(event.values[1]) > Math.abs(maxVec_y)){
                 maxVec_y = event.values[1];
             }
-            if(event.values[2] > maxVec_z){
+            if(Math.abs(event.values[2]) > Math.abs(maxVec_z)){
                 maxVec_z = event.values[2];
             }
             tv_rot_reading_high.setText("(" + String.format("%.2f",maxVec_x) + ", " + String.format("%.2f",maxVec_y) + ", " + String.format("%.2f",maxVec_z) + ")");;
