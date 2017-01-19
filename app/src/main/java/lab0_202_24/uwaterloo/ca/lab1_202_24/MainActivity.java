@@ -209,14 +209,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //changes in accelerometer
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
             accelerationHandler.HandleOutput(event.values);
-            for (int p = 0; p < 99; ++p){
-                for (int k = 0; k < 3; k++){
-                    accelArray[p+1][k] = accelArray[p][k];
-                }
-            }
-            for(int i = 0; i<3; i++) {                   //store current reading in first spot
-                accelArray[0][i] = event.values[i];
-            }
+            accelArray = accelerationHandler.GetAccelArray();
             /*float alpha = (float) 0.8;
 
             gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];

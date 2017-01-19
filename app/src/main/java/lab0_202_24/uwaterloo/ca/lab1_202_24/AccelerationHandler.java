@@ -14,7 +14,7 @@ public class AccelerationHandler extends SensorHandler {
 
     float[] gravity = new float[3];
     LineGraphView mLineGraphView;
-
+    double[][] accelArray = new double[100][3];
     AccelerationHandler(Context applicationContext, LinearLayout layout, String sensorType, LineGraphView lineGraphView){
         super(applicationContext, layout, sensorType);
         mLineGraphView = lineGraphView;
@@ -41,6 +41,19 @@ public class AccelerationHandler extends SensorHandler {
         super.HandleOutput(v, maxLen);
         v = ProcessData(v);
         mLineGraphView.addPoint(v);
+
+        for (int p = 0; p < 99; ++p){
+            for (int k = 0; k < 3; k++){
+                accelArray[p+1][k] = accelArray[p][k];
+            }
+        }
+        for(int i = 0; i<3; i++) {
+            accelArray[0][i] = v[i];
+        }
+    }
+
+    public double[][] GetAccelArray(){
+        return accelArray;
     }
 
 }
