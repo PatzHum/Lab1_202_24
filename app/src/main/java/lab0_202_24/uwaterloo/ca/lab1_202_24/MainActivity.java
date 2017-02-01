@@ -1,5 +1,6 @@
 package lab0_202_24.uwaterloo.ca.lab1_202_24;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         lineGraphView = new LineGraphView(getApplicationContext(), 100, Arrays.asList("x", "y", "z"));
+        lineGraphView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         layout.addView(lineGraphView);
         lineGraphView.setVisibility(View.VISIBLE);
 
@@ -207,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         //changes in accelerometer
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+        else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
             accelerationHandler.HandleOutput(event.values);
             accelArray = accelerationHandler.GetAccelArray();
             /*float alpha = (float) 0.8;
@@ -250,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         //changes in magnetic sensor
-        if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+        else if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
             mFieldHandler.HandleOutput(event.values);
             /*tv_magreading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");
             //check if max acceleration components achieved
@@ -268,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         //Changes in Rotation Vector
 
-        if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR){
+        else if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR){
             rotHandler.HandleOutput(event.values, 4);
             /*
             tv_rot_reading.setText("(" + String.format("%.2f",event.values[0]) + ", " + String.format("%.2f",event.values[1]) + ", " + String.format("%.2f",event.values[2]) + ")");;

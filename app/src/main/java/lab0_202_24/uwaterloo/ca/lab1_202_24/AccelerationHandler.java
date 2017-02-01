@@ -37,6 +37,10 @@ public class AccelerationHandler extends SensorHandler {
     }
 
     @Override
+    public void HandleOutput(float[] v){
+        HandleOutput(v, v.length);
+    }
+    @Override
     public void HandleOutput(float[] v, int maxLen) {
         super.HandleOutput(v, maxLen);
         v = ProcessData(v);
