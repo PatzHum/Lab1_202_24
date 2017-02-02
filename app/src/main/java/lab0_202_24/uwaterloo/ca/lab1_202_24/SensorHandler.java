@@ -16,19 +16,23 @@ public abstract class SensorHandler {
     Vector<Float> mMaximumValues;
 
     SensorHandler(Context applicationContext, LinearLayout layout, String sensorType){
+        //Store maximum values for the sensor
         mMaximumValues = new Vector<>();
 
+        //Create output labels for UI visuals
         mOutputLabel = new TextView(applicationContext);
         mOutputValue = new TextView(applicationContext);
         mMaxOutputLabel = new TextView(applicationContext);
         mMaxOutputValue = new TextView(applicationContext);
 
+        //Add to parent layout
         layout.addView(mOutputLabel);
         layout.addView(mOutputValue);
         layout.addView(mMaxOutputLabel);
         layout.addView(mMaxOutputValue);
 
 
+        //Parameterized string for readings.
         mOutputLabel.setText(String.format("The %s sensor reading is: ", sensorType));
         mMaxOutputLabel.setText(String.format("The maximum %s reading is: ", sensorType));
     }

@@ -12,22 +12,25 @@ import java.util.Locale;
 
 public class AccelerationHandler extends SensorHandler {
 
-    float[] gravity = new float[3];
+    float[] gravity = new float[3]; //Gravity Filter values
     LineGraphView mLineGraphView;
     double[][] accelArray = new double[100][3];
     AccelerationHandler(Context applicationContext, LinearLayout layout, String sensorType, LineGraphView lineGraphView){
         super(applicationContext, layout, sensorType);
-        mLineGraphView = lineGraphView;
+        mLineGraphView = lineGraphView;         //Get line graph view reference to manage
     }
 
     @Override
     protected float[] ProcessData(float[] values){
+        //Filter rate
         float alpha = (float) 0.8;
 
+        //Filter gravity out of data
         gravity[0] = alpha * gravity[0] + (1 - alpha) * values[0];
         gravity[1] = alpha * gravity[1] + (1 - alpha) * values[1];
         gravity[2] = alpha * gravity[2] + (1 - alpha) * values[2];
 
+        //New values after filtering
         float[] acc = new float[3];
         acc[0] = values[0] - gravity[0];
         acc[1] = values[1] - gravity[1];
@@ -44,18 +47,22 @@ public class AccelerationHandler extends SensorHandler {
     public void HandleOutput(float[] v, int maxLen) {
         super.HandleOutput(v, maxLen);
         v = ProcessData(v);
+        //Log data points on visual graph
         mLineGraphView.addPoint(v);
 
+        //Shift data points internally
         for (int i = 1; i < 100; ++i){
             for (int j = 0; j < 3; ++j){
                 accelArray[i-1][j] = accelArray[i][j];
             }
         }
+        //Log new data point
         for(int i = 0; i<3; i++) {
             accelArray[99][i] = v[i];
         }
     }
 
+    //Standard getter method.
     public double[][] GetAccelArray(){
         return accelArray;
     }
